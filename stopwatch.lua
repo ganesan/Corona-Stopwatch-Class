@@ -1,10 +1,10 @@
 --------
--- Stopwatch Class v1.0
+-- Stopwatch Class v1.1
 --
 -- by Kyle Coburn
 -- 9 March 2012
 ----
--- For the latest updates & support/feedback:
+-- For the latest updates, release notes, and support/feedback:
 -- http://developer.anscamobile.com/code/stopwatch-timing-class
 ----
 -- Usage:
@@ -38,6 +38,14 @@ local function timeFormat(secs)
 	return mins..":"..secs
 end
 
+
+function stopwatch:addTime(seconds)
+	if (self.endTime) then
+		self.endTime = self.endTime + seconds * 1000;
+	else
+		self.startTime = self.startTime - seconds * 1000;
+	end
+end
 
 function stopwatch:getElapsed()
 	if (self.pauseStart) then
@@ -77,7 +85,6 @@ end
 
 function stopwatch:resume()
 	if (self:isPaused()) then
-		print("Paused for:", getTime() - self.pauseStart)
 		if (self.endTime) then
 			self.endTime = self.endTime + (getTime() - self.pauseStart)
 		else
