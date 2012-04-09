@@ -1,8 +1,8 @@
 --------
--- Stopwatch Class v1.1
+-- Stopwatch Timing Class, v1.2
 --
 -- by Kyle Coburn
--- 9 March 2012
+-- 9 April 2012
 ----
 -- For the latest updates, release notes, and support/feedback:
 -- http://developer.anscamobile.com/code/stopwatch-timing-class
@@ -24,34 +24,27 @@ local function timeFormat(secs)
 	if (secs < 1) then
 		return "00:00"
 	end
-	local mins = "00"
 	if (secs > 59) then
-		mins = floor(secs / 60)
+		local mins = floor(secs / 60)
 		secs = secs % 60
 		if (mins < 10) then
 			mins = "0"..mins
 		end
+		return mins..":"..secs
 	end
 	if (secs < 10) then
 		secs = "0"..secs
 	end
-	return mins..":"..secs
+	return "00:"..secs
 end
 
 
-function stopwatch:addTime(seconds)
-	if (self.endTime) then
-		self.endTime = self.endTime + seconds * 1000;
-	else
-		self.startTime = self.startTime - seconds * 1000;
-	end
-end
-
+-- Time check
 function stopwatch:getElapsed()
-	if (self.pauseStart) then
-		return self.pauseStart - self.startTime
+	if (self._pauseStart) then
+		return self._pauseStart - self._startTime
 	end
-	return getTime() - self.startTime
+	return getTime() - self._startTime
 end
 
 function stopwatch:getElapsedSeconds()
@@ -59,10 +52,10 @@ function stopwatch:getElapsedSeconds()
 end
 
 function stopwatch:getRemaining()
-	if (self.pauseStart) then
-		return self.endTime - self.pauseStart
+	if (self._pauseStart) then
+		return self._endTime - self._pauseStart
 	end
-	return self.endTime - getTime()
+	return self._endTime - getTime()
 end
 
 function stopwatch:getRemainingSeconds()
@@ -70,50 +63,67 @@ function stopwatch:getRemainingSeconds()
 end
 
 function stopwatch:isElapsed()
-	return self.endTime and self.endTime - getTime() <= 0
+	if (self._endTime) then
+		return self:getRemaining() <= 0
+	end
 end
 
+
+-- Modify
+function stopwatch:addTime(seconds)
+	if (self._endTime) then
+		self._endTime = self._endTime + seconds * 1000
+	else
+		self._startTime = self._startTime - seconds * 1000
+	end
+end
+
+
+-- Pause
 function stopwatch:isPaused()
-	return self.pauseStart ~= nil
+	return self._pauseStart ~= nil
 end
 
 function stopwatch:pause()
 	if (not self:isPaused()) then
-		self.pauseStart = getTime()
+		self._pauseStart = getTime()
 	end
 end
 
 function stopwatch:resume()
 	if (self:isPaused()) then
-		if (self.endTime) then
-			self.endTime = self.endTime + (getTime() - self.pauseStart)
+		if (self._endTime) then
+			self._endTime = self._endTime + (getTime() - self._pauseStart)
 		else
-			self.startTime = self.startTime + (getTime() - self.pauseStart)
+			self._startTime = self._startTime + (getTime() - self._pauseStart)
 		end
-		self.pauseStart = nil
+		self._pauseStart = nil
 	end
 end
 
+
+-- Formatting
 function stopwatch:toElapsedString()
 	return timeFormat(self:getElapsedSeconds())
 end
 
 function stopwatch:toRemainingString()
-	if (not self.endTime) then
-		return "00:00"
+	if (not self._endTime) then
+		return "99:99"
 	end
 	return timeFormat(self:getRemainingSeconds())
 end
 
 
+-- Object creation
 function stopwatch.new(countdown)
 	local newTimer = {}
 	local startTime = getTime()
 
 	if (countdown) then
-		newTimer.endTime = startTime + countdown * 1000
+		newTimer._endTime = startTime + countdown * 1000
 	end
-	newTimer.startTime = startTime
+	newTimer._startTime = startTime
 
 	return setmetatable(newTimer, stopwatch_mt)
 end
