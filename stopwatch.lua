@@ -1,8 +1,8 @@
 --------
--- Stopwatch Timing Class, v1.2
+-- Stopwatch Timing Class, v1.2.1
 --
 -- by Kyle Coburn
--- 9 April 2012
+-- 10 April 2012
 ----
 -- For the latest updates, release notes, and support/feedback:
 -- http://developer.anscamobile.com/code/stopwatch-timing-class
@@ -24,18 +24,18 @@ local function timeFormat(secs)
 	if (secs < 1) then
 		return "00:00"
 	end
+	local mins = "00"
 	if (secs > 59) then
-		local mins = floor(secs / 60)
-		secs = secs % 60
+		mins = floor(secs / 60)
 		if (mins < 10) then
 			mins = "0"..mins
 		end
-		return mins..":"..secs
+		secs = secs % 60
 	end
 	if (secs < 10) then
 		secs = "0"..secs
 	end
-	return "00:"..secs
+	return mins..":"..secs
 end
 
 
